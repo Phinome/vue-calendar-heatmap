@@ -114,10 +114,16 @@ Array of objects with `date` and `count` keys. `date` values can be a date parse
 
 ### **locale** - `locale`
 
-Can be a date parseable string, a millisecond timestamp, or a Date object. The calendar will start automatically one year before this date.
+Object of 5 keys which represents the locale text.
+
+- `month`: `['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']`
+- `days`: `['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']`
+- `on`: `on`
+- `tooltipUnit`: `contributions`,
+- `tooltipEmptyUnit`: `No`
 
 ```html
-<calendar-heatmap :end-date="2018-9-22" ... />
+<calendar-heatmap :locale="locale" ... />
 ```
 
 ### **rangeColor** - `range-color`
@@ -156,14 +162,6 @@ Boolean for enable/disable tooltip on square hover. `true` by default.
 
 ```html
 <calendar-heatmap :tooltip="false" ... />
-```
-
-### **tooltipContent** - `tooltipContent`
-
-String representing heatmap tooltip content. Value is `<b>${day.count} ${locale.tooltipUnit}</b> ${locale.on} ${locale.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}` by default.
-
-```html
-<calendar-heatmap tooltip-unit="stars" ... />
 ```
 
 ### **vertical** - `vertical`

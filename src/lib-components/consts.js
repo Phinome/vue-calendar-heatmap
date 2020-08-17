@@ -5,6 +5,7 @@ export const DEFAULT_LOCALE = {
   days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   on: 'on',
   tooltipUnit: 'contributions',
+  tooltipEmptyUnit: 'No ',
 };
 
 export const DAYS_IN_ONE_YEAR = 365;

@@ -15,21 +15,21 @@
       <text
         class="vch__day__label"
         :x="vertical ? SQUARE_SIZE * 1 : 0"
-        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 20"
+        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 18"
       >
         {{ lo.days[1] }}
       </text>
       <text
         class="vch__day__label"
         :x="vertical ? SQUARE_SIZE * 3 : 0"
-        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 44"
+        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 42"
       >
         {{ lo.days[3] }}
       </text>
       <text
         class="vch__day__label"
         :x="vertical ? SQUARE_SIZE * 5 : 0"
-        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 69"
+        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 67"
       >
         {{ lo.days[5] }}
       </text>
@@ -68,10 +68,8 @@ import { VTooltip } from 'v-tooltip';
 import Heatmap from './Heatmap';
 import { DAYS_IN_WEEK, DEFAULT_LOCALE, DEFAULT_RANGE_COLOR, SQUARE_SIZE } from './consts.js';
 
-// VTooltip.enabled = window.innerWidth > 768;
-
 export default {
-  name: 'VueCalendarHeatmap',
+  name: 'CalendarHeatmap',
   directives: {
     tooltip: VTooltip,
   },
@@ -93,9 +91,6 @@ export default {
     tooltip: {
       type: Boolean,
       default: true,
-    },
-    tooltipContent: {
-      type: String,
     },
     vertical: {
       type: Boolean,
@@ -192,12 +187,20 @@ export default {
           days: this.locale.days || DEFAULT_LOCALE.days,
           on: this.locale.on || DEFAULT_LOCALE.on,
           tooltipUnit: this.locale.tooltipUnit || DEFAULT_LOCALE.tooltipUnit,
+          tooltipEmptyUnit: this.locale.tooltipEmptyUnit || DEFAULT_LOCALE.tooltipEmptyUnit,
         };
       }
       return DEFAULT_LOCALE;
     },
   },
-
+  watch: {
+    values: {
+      handler() {
+        this.clickedIndex = -1;
+      },
+      immediate: true,
+    },
+  },
   methods: {
     handleSquareClick(day, dayIndex) {
       if (this.clickedIndex === dayIndex) {
@@ -208,13 +211,15 @@ export default {
       this.$emit('day-click', day);
     },
     tooltipOptions(day) {
-      const defaultTooltipContent = `<b>${day.count} ${this.lo.tooltipUnit}</b> ${this.lo.on} ${
-        this.lo.months[day.date.getMonth()]
-      } ${day.date.getDate()}, ${day.date.getFullYear()}`;
+      const defaultTooltipContent = `<b>${
+        day.count
+          ? [day.count, this.lo.tooltipUnit].join(' ')
+          : [this.lo.tooltipEmptyUnit, this.lo.tooltipUnit].join('')
+      }</b> ${this.lo.on} ${day.date.getFullYear()}-${day.date.getMonth() + 1}-${day.date.getDate()}`;
       if (this.tooltip) {
         if (day.count != null) {
           return {
-            content: this.tooltipContent ? this.tooltipContent : defaultTooltipContent,
+            content: defaultTooltipContent,
             delay: { show: 300, hide: 50 },
           };
         } else if (this.noDataText) {
@@ -264,11 +269,11 @@ svg.vch__wrapper {
 }
 
 svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label {
-  font-size: 10px;
+  font-size: 5px;
 }
 
 svg.vch__wrapper .vch__days__labels__wrapper text.vch__day__label {
-  font-size: 9px;
+  font-size: 5px;
 }
 
 svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label,

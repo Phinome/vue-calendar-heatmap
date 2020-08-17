@@ -2,13 +2,16 @@ import { DAYS_IN_ONE_YEAR, DAYS_IN_WEEK } from './consts';
 
 export default class CalendarHeatmap {
   constructor(values, max) {
-    if (!values.length) {
-      throw new Error('values must not be empty');
-    }
     this.values = values;
-    this.startDate = this._parseDate(values[0].date);
-    this.endDate = this._parseDate(values[values.length - 1].date);
     this.max = max || Math.ceil((Math.max(...values.map((day) => day.count)) / 5) * 4);
+
+    if (values.length) {
+      this.startDate = this._parseDate(values[0].date);
+      this.endDate = this._parseDate(values[values.length - 1].date);
+    } else {
+      this.startDate = this._shiftDate(new Date(), -DAYS_IN_ONE_YEAR);
+      this.endDate = new Date();
+    }
   }
 
   get activities() {
@@ -50,6 +53,11 @@ export default class CalendarHeatmap {
         if (lastWeek.getFullYear() < currentWeek.getFullYear() || lastWeek.getMonth() < currentWeek.getMonth()) {
           months.push({ value: currentWeek.getMonth(), index });
         }
+      } else {
+        months.push({
+          value: week[0].date.getMonth(),
+          index: 0,
+        });
       }
       return months;
     }, []);
@@ -77,6 +85,12 @@ export default class CalendarHeatmap {
 
   getDaysCount() {
     return this.values.length;
+  }
+
+  _shiftDate(date, numDays) {
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + numDays);
+    return newDate;
   }
 
   _parseDate(entry) {

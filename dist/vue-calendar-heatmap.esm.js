@@ -5,21 +5,25 @@ const DEFAULT_LOCALE = {
   months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   on: 'on',
-  tooltipUnit: 'contributions'
+  tooltipUnit: 'contributions',
+  tooltipEmptyUnit: 'No '
 };
+const DAYS_IN_ONE_YEAR = 365;
 const DAYS_IN_WEEK = 7;
 const SQUARE_SIZE = 10;
 
 class CalendarHeatmap {
   constructor(values, max) {
-    if (!values.length) {
-      throw new Error('values must not be empty');
-    }
-
     this.values = values;
-    this.startDate = this._parseDate(values[0].date);
-    this.endDate = this._parseDate(values[values.length - 1].date);
     this.max = max || Math.ceil(Math.max(...values.map(day => day.count)) / 5 * 4);
+
+    if (values.length) {
+      this.startDate = this._parseDate(values[0].date);
+      this.endDate = this._parseDate(values[values.length - 1].date);
+    } else {
+      this.startDate = this._shiftDate(new Date(), -DAYS_IN_ONE_YEAR);
+      this.endDate = new Date();
+    }
   }
 
   get activities() {
@@ -69,6 +73,11 @@ class CalendarHeatmap {
             index
           });
         }
+      } else {
+        months.push({
+          value: week[0].date.getMonth(),
+          index: 0
+        });
       }
 
       return months;
@@ -99,6 +108,12 @@ class CalendarHeatmap {
     return this.values.length;
   }
 
+  _shiftDate(date, numDays) {
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + numDays);
+    return newDate;
+  }
+
   _parseDate(entry) {
     return entry instanceof Date ? entry : new Date(entry);
   }
@@ -112,9 +127,8 @@ class CalendarHeatmap {
 }
 
 //
-
 var script = {
-  name: 'VueCalendarHeatmap',
+  name: 'CalendarHeatmap',
   directives: {
     tooltip: VTooltip
   },
@@ -136,9 +150,6 @@ var script = {
     tooltip: {
       type: Boolean,
       default: true
-    },
-    tooltipContent: {
-      type: String
     },
     vertical: {
       type: Boolean,
@@ -244,13 +255,23 @@ var script = {
           months: this.locale.months || DEFAULT_LOCALE.months,
           days: this.locale.days || DEFAULT_LOCALE.days,
           on: this.locale.on || DEFAULT_LOCALE.on,
-          tooltipUnit: this.locale.tooltipUnit || DEFAULT_LOCALE.tooltipUnit
+          tooltipUnit: this.locale.tooltipUnit || DEFAULT_LOCALE.tooltipUnit,
+          tooltipEmptyUnit: this.locale.tooltipEmptyUnit || DEFAULT_LOCALE.tooltipEmptyUnit
         };
       }
 
       return DEFAULT_LOCALE;
     }
 
+  },
+  watch: {
+    values: {
+      handler() {
+        this.clickedIndex = -1;
+      },
+
+      immediate: true
+    }
   },
   methods: {
     handleSquareClick(day, dayIndex) {
@@ -264,12 +285,12 @@ var script = {
     },
 
     tooltipOptions(day) {
-      const defaultTooltipContent = `<b>${day.count} ${this.lo.tooltipUnit}</b> ${this.lo.on} ${this.lo.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`;
+      const defaultTooltipContent = `<b>${day.count ? [day.count, this.lo.tooltipUnit].join(' ') : [this.lo.tooltipEmptyUnit, this.lo.tooltipUnit].join('')}</b> ${this.lo.on} ${day.date.getFullYear()}-${day.date.getMonth() + 1}-${day.date.getDate()}`;
 
       if (this.tooltip) {
         if (day.count != null) {
           return {
-            content: this.tooltipContent ? this.tooltipContent : defaultTooltipContent,
+            content: defaultTooltipContent,
             delay: {
               show: 300,
               hide: 50
@@ -491,19 +512,19 @@ var __vue_render__ = function () {
     staticClass: "vch__day__label",
     attrs: {
       "x": _vm.vertical ? _vm.SQUARE_SIZE * 1 : 0,
-      "y": _vm.vertical ? _vm.SQUARE_SIZE - _vm.SQUARE_BORDER_SIZE : 20
+      "y": _vm.vertical ? _vm.SQUARE_SIZE - _vm.SQUARE_BORDER_SIZE : 18
     }
   }, [_vm._v("\n      " + _vm._s(_vm.lo.days[1]) + "\n    ")]), _vm._v(" "), _c('text', {
     staticClass: "vch__day__label",
     attrs: {
       "x": _vm.vertical ? _vm.SQUARE_SIZE * 3 : 0,
-      "y": _vm.vertical ? _vm.SQUARE_SIZE - _vm.SQUARE_BORDER_SIZE : 44
+      "y": _vm.vertical ? _vm.SQUARE_SIZE - _vm.SQUARE_BORDER_SIZE : 42
     }
   }, [_vm._v("\n      " + _vm._s(_vm.lo.days[3]) + "\n    ")]), _vm._v(" "), _c('text', {
     staticClass: "vch__day__label",
     attrs: {
       "x": _vm.vertical ? _vm.SQUARE_SIZE * 5 : 0,
-      "y": _vm.vertical ? _vm.SQUARE_SIZE - _vm.SQUARE_BORDER_SIZE : 69
+      "y": _vm.vertical ? _vm.SQUARE_SIZE - _vm.SQUARE_BORDER_SIZE : 67
     }
   }, [_vm._v("\n      " + _vm._s(_vm.lo.days[5]) + "\n    ")])]), _vm._v(" "), _c('g', {
     class: ['vch__year__wrapper', this.clickedIndex !== -1 ? 'vch__days__selected' : ''],
@@ -550,11 +571,11 @@ var __vue_staticRenderFns__ = [];
 
 const __vue_inject_styles__ = function (inject) {
   if (!inject) return;
-  inject("data-v-1aa791a0_0", {
-    source: "div.vch__container[data-v-1aa791a0]{position:relative}svg.vch__wrapper[data-v-1aa791a0]{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif;line-height:10px}svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label[data-v-1aa791a0]{font-size:10px}svg.vch__wrapper .vch__days__labels__wrapper text.vch__day__label[data-v-1aa791a0]{font-size:9px}svg.vch__wrapper .vch__days__labels__wrapper text.vch__day__label[data-v-1aa791a0],svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label[data-v-1aa791a0]{fill:#767676}svg.vch__wrapper rect.vch__day__square[data-v-1aa791a0]:focus{outline:0}svg.vch__wrapper g.vch__days__selected rect[data-v-1aa791a0]{opacity:.5}svg.vch__wrapper g.vch__year__wrapper rect.vch__day__square__actived[data-v-1aa791a0]{opacity:1}",
+  inject("data-v-3fbb7ec2_0", {
+    source: "div.vch__container[data-v-3fbb7ec2]{position:relative}svg.vch__wrapper[data-v-3fbb7ec2]{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif;line-height:10px}svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label[data-v-3fbb7ec2]{font-size:5px}svg.vch__wrapper .vch__days__labels__wrapper text.vch__day__label[data-v-3fbb7ec2]{font-size:5px}svg.vch__wrapper .vch__days__labels__wrapper text.vch__day__label[data-v-3fbb7ec2],svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label[data-v-3fbb7ec2]{fill:#767676}svg.vch__wrapper rect.vch__day__square[data-v-3fbb7ec2]:focus{outline:0}svg.vch__wrapper g.vch__days__selected rect[data-v-3fbb7ec2]{opacity:.5}svg.vch__wrapper g.vch__year__wrapper rect.vch__day__square__actived[data-v-3fbb7ec2]{opacity:1}",
     map: undefined,
     media: undefined
-  }), inject("data-v-1aa791a0_1", {
+  }), inject("data-v-3fbb7ec2_1", {
     source: ".vue-tooltip-theme.tooltip{display:block!important;z-index:10000}.vue-tooltip-theme.tooltip .tooltip-inner{background:rgba(0,0,0,.7);border-radius:3px;color:#ebedf0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif;font-size:12px;line-height:16px;padding:14px 10px}.vue-tooltip-theme.tooltip .tooltip-inner b{color:#fff}.vue-tooltip-theme.tooltip .tooltip-arrow{width:0;height:0;border-style:solid;position:absolute;margin:5px;border-color:#000;z-index:1}.vue-tooltip-theme.tooltip[x-placement^=top]{margin-bottom:5px}.vue-tooltip-theme.tooltip[x-placement^=top] .tooltip-arrow{border-width:5px 5px 0 5px;border-left-color:transparent!important;border-right-color:transparent!important;border-bottom-color:transparent!important;bottom:-5px;left:calc(50% - 5px);margin-top:0;margin-bottom:0}.vue-tooltip-theme.tooltip[x-placement^=bottom]{margin-top:5px}.vue-tooltip-theme.tooltip[x-placement^=bottom] .tooltip-arrow{border-width:0 5px 5px 5px;border-left-color:transparent!important;border-right-color:transparent!important;border-top-color:transparent!important;top:-5px;left:calc(50% - 5px);margin-top:0;margin-bottom:0}.vue-tooltip-theme.tooltip[x-placement^=right]{margin-left:5px}.vue-tooltip-theme.tooltip[x-placement^=right] .tooltip-arrow{border-width:5px 5px 5px 0;border-left-color:transparent!important;border-top-color:transparent!important;border-bottom-color:transparent!important;left:-5px;top:calc(50% - 5px);margin-left:0;margin-right:0}.vue-tooltip-theme.tooltip[x-placement^=left]{margin-right:5px}.vue-tooltip-theme.tooltip[x-placement^=left] .tooltip-arrow{border-width:5px 0 5px 5px;border-top-color:transparent!important;border-right-color:transparent!important;border-bottom-color:transparent!important;right:-5px;top:calc(50% - 5px);margin-left:0;margin-right:0}.vue-tooltip-theme.tooltip[aria-hidden=true]{visibility:hidden;opacity:0;transition:opacity .15s,visibility .15s}.vue-tooltip-theme.tooltip[aria-hidden=false]{visibility:visible;opacity:1;transition:opacity .15s}",
     map: undefined,
     media: undefined
@@ -563,7 +584,7 @@ const __vue_inject_styles__ = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__ = "data-v-1aa791a0";
+const __vue_scope_id__ = "data-v-3fbb7ec2";
 /* module identifier */
 
 const __vue_module_identifier__ = undefined;

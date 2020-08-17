@@ -5,7 +5,7 @@ import { VueCalendarHeatmap } from '@/entry';
 function getVirtulData() {
   var today = +new Date();
   var dayTime = 3600 * 24 * 1000;
-  var thatday = today - dayTime * 60;
+  var thatday = today - dayTime * 65;
 
   var data = [];
   for (var time = thatday; time <= today; time += dayTime) {
