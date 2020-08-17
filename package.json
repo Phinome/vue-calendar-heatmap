@@ -1,7 +1,7 @@
 {
   "name": "@byted-light/vue-calendar-heatmap",
   "version": "1.0.0",
-  "description": "",
+  "description": "A lightweight calendar heatmap Vuejs component built on SVG, inspired by github's contribution calendar graph. base from vue-calendar-heatmap",
   "main": "dist/vue-calendar-heatmap.ssr.js",
   "browser": "dist/vue-calendar-heatmap.esm.js",
   "module": "dist/vue-calendar-heatmap.esm.js",
