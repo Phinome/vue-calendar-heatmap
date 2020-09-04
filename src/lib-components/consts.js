@@ -2,7 +2,7 @@ export const DEFAULT_RANGE_COLOR = ['#ebedf0', '#f5f6f7', '#D6E8FF', '#3370ff', 
 
 export const DEFAULT_LOCALE = {
   months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  days: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+  days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   on: 'on',
   tooltipUnit: 'contributions',
   tooltipEmptyUnit: 'No ',
