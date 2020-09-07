@@ -274,11 +274,11 @@ svg.vch__wrapper {
 }
 
 svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label {
-  font-size: 8px;
+  font-size: 6px;
 }
 
 svg.vch__wrapper .vch__days__labels__wrapper text.vch__day__label {
-  font-size: 8px;
+  font-size: 6px;
 }
 
 svg.vch__wrapper .vch__months__labels__wrapper text.vch__month__label,
